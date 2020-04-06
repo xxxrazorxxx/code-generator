@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<app>
+    <entity name="\Core\Catalog\Entities\Product"
+            table="products"
+    >
+        <behavior name="\Core\Support\Traits\Timestampable"/>
+        <behavior name="\Core\Support\Traits\WithParent"/>
+        <behavior name="\Core\Support\Traits\Translatable"/>
+
+        <id>
+            <property name="id"
+                      type="integer"
+                      column="product_id"
+                      storageType="integer"
+                      isSigned="false"
+                      isAutoincremented="true"
+            />
+        </id>
+
+        <property name="sku"
+                  type="string"
+                  column="code"
+                  storageType="varchar(64)"
+                  isUnique="false"
+                  isNullable="false"
+                  defaultValue=""
+                  accessedWith="\Core\Catalog\Generators\ProductGenerator::getSku()"
+                  mutatedWith="\Core\Catalog\Generators\ProductGenerator::setSku()"
+        >
+            <lengthValidationRule min="0"
+                                  max="64"
+            />
+            <regexValidationRule mask="\S+"
+                                 modifiers="gui"
+            />
+        </property>
+
+        <property name="companyId"
+                  type="integer"
+                  column="company_id"
+                  isNullable="false"
+                  isSigned="false"
+                  defaultValue="0"
+        />
+
+        <property name="status"
+                  type="\Core\Catalog\ValueObjects\ProductStatusInterface"
+                  column="status"
+                  storageType="enum"
+                  isNullable="false"
+                  defaultValue="\Core\Catalog\ValueObjects\ProductStatuses\Active"
+        >
+            <enumValue value="\Core\Catalog\ValueObjects\ProductStatuses\Active"/>
+            <enumValue value="\Core\Catalog\ValueObjects\ProductStatuses\Hidden"/>
+            <enumValue value="\Core\Catalog\ValueObjects\ProductStatuses\Disabled"/>
+        </property>
+
+        <index name="idx_company_id"
+               isUnique="false"
+        >
+            <indexColumn name="company_id"
+                         order="none"
+            />
+        </index>
+
+        <!-- One to Many (inverse side) -->
+        <belongsTo targetEntity="\Core\Company\Entities\Company"
+                   property="company"
+        />
+        <!-- One to One -->
+        <hasOne targetEntity="\Addons\VendorDataModeration\Entities\ReviewResult"
+                property="reviewResult"
+                key="id"
+                foreignKey="product_id"
+        />
+        <!-- One to One (self reference) -->
+        <hasOne targetEntity="\Core\Catalog\Entities\Product"
+                property="parentProduct"
+                key="parent_product_id"
+                foreignKey="id"
+        />
+    </entity>
+
+    <entity name="\Core\Company\Entities\Company"
+            table="Company"
+    >
+        <!-- One to Many -->
+        <hasMany targetEntity="\Core\Catalog\Entities\Product"
+                 property="products"
+                 key="id"
+                 foreignKey="company_id"
+        />
+        <!-- Many to  Many -->
+        <belongsToMany targetEntity="\Core\Storefront\Entities\Storefront"
+                       property="storefronts"
+                       table="storefronts_companies"
+                       key="id"
+                       foreignKey="company_id"
+        />
+    </entity>
+
+    <entity name="\Core\Storefront\Entities\Storefront"
+            table="storefronts"
+    >
+        <!-- Many to Many -->
+        <belongsToMany targetEntity="\Core\Company\Entities\Company"
+                       property="companies"
+                       table="storefronts_companies"
+                       key="id"
+                       foreignKey="storefront_id"
+        />
+    </entity>
+</app>

@@ -1,0 +1,33 @@
+<?php
+
+namespace [% namespace %];
+
+[% use_command_placeholder %]
+
+class [% model_name_class %] [% model_extends %]
+{
+    /**
+     * The database table used by the model.
+     *
+     * @var string
+     */
+    protected $table = '[% table %]';
+
+[% primary_key %]
+
+    /**
+     * Attributes that should be mass-assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [[% fillable %]];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [[% casts %]];
+
+[% relationships %]
+}
